@@ -84,6 +84,7 @@ class _RecordPageState extends State<RecordPage>
       if (available) {
         setState(() => _isListening = true);
         _speech.listen(
+          localeId: getLanguageData(initialLanguage).locale,
           onResult: (result) {
             // In a real app, we would process partial results here
             // For now, we wait for the final result or user stop
@@ -120,7 +121,7 @@ class _RecordPageState extends State<RecordPage>
     StorageService().saveVoiceHistory(conversation);
 
     // Determine target code
-    String targetCode = kLanguageCodes[endLanguage] ?? 'en';
+    String targetCode = getLanguageData(endLanguage).code;
 
     // Translate
     translator.translate(text, to: targetCode).then((translation) {
@@ -159,36 +160,43 @@ class _RecordPageState extends State<RecordPage>
   Widget build(BuildContext context) {
     super.build(context); // Important for KeepAlive
     return Scaffold(
-      backgroundColor: Colors.transparent, // Handled by nav wrapper
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Voice Translation',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          _buildLanguageHeader(),
-          Expanded(
-            child: ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              itemCount: conversation.length,
-              itemBuilder: (context, index) {
-                final item = conversation[index];
-                return AnimatedListItem(
-                  index: index,
-                  child: _buildChatBubble(item),
-                );
-              },
+      floatingActionButton: _buildFooter(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.center,
+              child: const Text(
+                'Voice Translation',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20),
+              ),
             ),
-          ),
-          _buildFooter(),
-        ],
+            const SizedBox(height: 10),
+            _buildLanguageHeader(),
+            const SizedBox(height: 2),
+            Expanded(
+              child: ListView.builder(
+                reverse: true,
+                padding: const EdgeInsets.only(
+                    left: 16, right: 16, top: 20, bottom: 120),
+                itemCount: conversation.length,
+                itemBuilder: (context, index) {
+                  final item = conversation[conversation.length - 1 - index];
+                  return AnimatedListItem(
+                    index: index,
+                    child: _buildChatBubble(item),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -357,26 +365,27 @@ class _RecordPageState extends State<RecordPage>
                   const SizedBox(height: 10),
                   // Simulated transliteration
                   const Text(
-                    "Simulated transliteration text...",
+                    "Translated text...",
                     style: TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
                         fontFamily: 'monospace'),
                   ),
-                  const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: IconButton(
-                      onPressed: () =>
-                          _speak(item['text'], kLanguageCodes[item['lang']]!),
-                      icon: const Icon(LucideIcons.volume2,
+                    child: InkWell(
+                      onTap: () => _speak(
+                          item['text'], getLanguageData(item['lang']).code),
+                      child: const Icon(LucideIcons.volume2,
                           color: Colors.white54, size: 20),
                     ),
                   )
                 ],
                 const SizedBox(height: 5),
                 Text(
-                  isUser ? "English • Just now" : "Japanese • Translated",
+                  isUser
+                      ? "${item['lang']} • Just now"
+                      : "${item['lang']} • Translated",
                   style: TextStyle(
                       color: isUser ? Colors.white38 : Colors.white60,
                       fontSize: 10),
@@ -390,60 +399,64 @@ class _RecordPageState extends State<RecordPage>
   }
 
   Widget _buildFooter() {
-    return Container(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        children: [
-          Text(
-            _isListening ? "Listening..." : "Tap microphone to Talk",
-            style: const TextStyle(color: Colors.white54, fontSize: 16),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          _isListening ? "Listening..." : "Tap microphone to Talk",
+          style: const TextStyle(color: Colors.white54, fontSize: 16),
+        ),
+        const SizedBox(height: 20),
+        // Audio Wave Visualization (Static lines for now)
+        if (_isListening)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(
+                8,
+                (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: 4,
+                      height: 15 + (index % 3) * 10,
+                      decoration: BoxDecoration(
+                        color: _isListening
+                            ? const Color.fromARGB(255, 196, 43, 32)
+                            : AppColors.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    )),
           ),
-          const SizedBox(height: 20),
-          // Audio Wave Visualization (Static lines for now)
-          if (_isListening)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                  8,
-                  (index) => Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        width: 4,
-                        height: 15 + (index % 3) * 10,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      )),
-            ),
-          if (_isListening) const SizedBox(height: 20),
+        if (_isListening) const SizedBox(height: 20),
 
-          GestureDetector(
-            onTap: _isListening ? stopListening : startListening,
-            child: Container(
-              height: 70,
-              width: 70,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary,
-                  boxShadow: [
-                    BoxShadow(
-                        color: AppColors.primary.withOpacity(0.5),
-                        blurRadius: 20,
-                        spreadRadius: 5)
-                  ]),
-              child: Icon(
-                _isListening ? LucideIcons.stopCircle : LucideIcons.mic,
-                color: Colors.white,
-                size: 32,
-              ),
+        GestureDetector(
+          onTap: _isListening ? stopListening : startListening,
+          child: Container(
+            height: 70,
+            width: 70,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _isListening
+                    ? const Color.fromARGB(255, 196, 43, 32)
+                    : AppColors.primary,
+                boxShadow: [
+                  BoxShadow(
+                      color: AppColors.primary.withOpacity(0.5),
+                      blurRadius: 20,
+                      spreadRadius: 5)
+                ]),
+            child: Icon(
+              _isListening ? LucideIcons.stopCircle : LucideIcons.mic,
+              color: Colors.white,
+              size: 32,
             ),
           ),
-          const SizedBox(height: 10),
-          if (_isListening)
-            const Text("Tap to stop",
-                style: TextStyle(color: Colors.white38, fontSize: 12)),
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+        if (_isListening)
+          const Text("Tap to stop",
+              style: TextStyle(color: Colors.white38, fontSize: 12)),
+      ],
     );
   }
 }

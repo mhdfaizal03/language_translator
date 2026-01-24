@@ -20,58 +20,60 @@ class AppColors {
   static final Color glassBorder = Colors.transparent;
 }
 
-const List<String> kLanguages = [
-  'Auto',
-  'English',
-  'Hindi',
-  'Marathi',
-  'Spanish',
-  'French',
-  'German',
-  'Chinese',
-  'Japanese',
-  'Korean',
-  'Italian',
-  'Malayalam',
-  'Arabic',
-  'Russian',
-  'Portuguese',
-  'Bengali',
-  'Dutch',
-  'Swedish',
-  'Thai',
-  'Turkish',
-  'Vietnamese',
-  'Greek',
-  'Polish',
-  'Romanian',
-  'Hungarian',
+class LanguageData {
+  final String name; // Display Name (e.g., 'English')
+  final String code; // Translation Code (ISO 639-1, e.g., 'en')
+  final String locale; // Speech/TTS Locale (BCP-47, e.g., 'en-US')
+
+  const LanguageData(
+      {required this.name, required this.code, required this.locale});
+}
+
+const List<LanguageData> kLanguageData = [
+  LanguageData(name: 'Auto', code: 'auto', locale: 'auto'),
+  LanguageData(name: 'Afrikaans', code: 'af', locale: 'af-ZA'),
+  LanguageData(name: 'Arabic', code: 'ar', locale: 'ar-SA'),
+  LanguageData(name: 'Bengali', code: 'bn', locale: 'bn-IN'),
+  LanguageData(name: 'Chinese', code: 'zh', locale: 'zh-CN'),
+  LanguageData(name: 'Czech', code: 'cs', locale: 'cs-CZ'),
+  LanguageData(name: 'Danish', code: 'da', locale: 'da-DK'),
+  LanguageData(name: 'Dutch', code: 'nl', locale: 'nl-NL'),
+  LanguageData(name: 'English', code: 'en', locale: 'en-US'),
+  LanguageData(name: 'Finnish', code: 'fi', locale: 'fi-FI'),
+  LanguageData(name: 'French', code: 'fr', locale: 'fr-FR'),
+  LanguageData(name: 'German', code: 'de', locale: 'de-DE'),
+  LanguageData(name: 'Greek', code: 'el', locale: 'el-GR'),
+  LanguageData(name: 'Gujarati', code: 'gu', locale: 'gu-IN'),
+  LanguageData(name: 'Hindi', code: 'hi', locale: 'hi-IN'),
+  LanguageData(name: 'Hungarian', code: 'hu', locale: 'hu-HU'),
+  LanguageData(name: 'Indonesian', code: 'id', locale: 'id-ID'),
+  LanguageData(name: 'Italian', code: 'it', locale: 'it-IT'),
+  LanguageData(name: 'Japanese', code: 'ja', locale: 'ja-JP'),
+  LanguageData(name: 'Kannada', code: 'kn', locale: 'kn-IN'),
+  LanguageData(name: 'Korean', code: 'ko', locale: 'ko-KR'),
+  LanguageData(name: 'Malayalam', code: 'ml', locale: 'ml-IN'),
+  LanguageData(name: 'Marathi', code: 'mr', locale: 'mr-IN'),
+  LanguageData(name: 'Polish', code: 'pl', locale: 'pl-PL'),
+  LanguageData(name: 'Portuguese', code: 'pt', locale: 'pt-PT'),
+  LanguageData(name: 'Punjabi', code: 'pa', locale: 'pa-IN'),
+  LanguageData(name: 'Romanian', code: 'ro', locale: 'ro-RO'),
+  LanguageData(name: 'Russian', code: 'ru', locale: 'ru-RU'),
+  LanguageData(name: 'Spanish', code: 'es', locale: 'es-ES'),
+  LanguageData(name: 'Swedish', code: 'sv', locale: 'sv-SE'),
+  LanguageData(name: 'Tamil', code: 'ta', locale: 'ta-IN'),
+  LanguageData(name: 'Telugu', code: 'te', locale: 'te-IN'),
+  LanguageData(name: 'Thai', code: 'th', locale: 'th-TH'),
+  LanguageData(name: 'Turkish', code: 'tr', locale: 'tr-TR'),
+  LanguageData(name: 'Ukrainian', code: 'uk', locale: 'uk-UA'),
+  LanguageData(name: 'Urdu', code: 'ur', locale: 'ur-PK'),
+  LanguageData(name: 'Vietnamese', code: 'vi', locale: 'vi-VN'),
 ];
 
-const Map<String, String> kLanguageCodes = {
-  'Auto': 'auto',
-  'English': 'en',
-  'Hindi': 'hi',
-  'Marathi': 'mr',
-  'Spanish': 'es',
-  'French': 'fr',
-  'German': 'de',
-  'Chinese': 'zh',
-  'Japanese': 'ja',
-  'Korean': 'ko',
-  'Italian': 'it',
-  'Malayalam': 'ml',
-  'Arabic': 'ar',
-  'Russian': 'ru',
-  'Portuguese': 'pt',
-  'Bengali': 'bn',
-  'Dutch': 'nl',
-  'Swedish': 'sv',
-  'Thai': 'th',
-  'Turkish': 'tr',
-  'Vietnamese': 'vi',
-  'Greek': 'el',
-  'Polish': 'pl',
-  'Romanian': 'ro',
-  'Hungarian': 'hu',
-};
+// Helper to get simple list of names for pickers
+List<String> get kLanguages => kLanguageData.map((e) => e.name).toList();
+
+// Helper to look up data by name
+LanguageData getLanguageData(String name) {
+  return kLanguageData.firstWhere((e) => e.name == name,
+      orElse: () => kLanguageData[1]); // Default to English
+}

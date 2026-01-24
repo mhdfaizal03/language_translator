@@ -129,7 +129,7 @@ class _ScanToTextState extends State<ScanToText> {
     setState(() => _isTranslating = true);
     try {
       final translation = await _translator.translate(_response!.recognizedText,
-          to: kLanguageCodes[_targetLanguage] ?? 'en');
+          to: getLanguageData(_targetLanguage).code);
 
       if (!mounted) return;
 

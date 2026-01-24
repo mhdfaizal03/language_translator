@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       var translation = await translator.translate(
         input,
-        from: kLanguageCodes[initialLanguage] ?? 'auto',
+        from: getLanguageData(initialLanguage).code,
         to: end,
       );
       if (!mounted) return;
@@ -443,7 +443,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   if (controller.text.isNotEmpty) {
                     _speak(controller.text,
-                        kLanguageCodes[initialLanguage] ?? 'en-US');
+                        getLanguageData(initialLanguage).locale);
                   }
                 },
                 icon: const Icon(LucideIcons.mic, color: Colors.white54),
@@ -520,7 +520,7 @@ class _MyHomePageState extends State<MyHomePage> {
           borderRadius: BorderRadius.circular(16),
           onTap: () {
             if (controller.text.isNotEmpty) {
-              translate(kLanguageCodes[endLanguage]!, controller.text);
+              translate(getLanguageData(endLanguage).code, controller.text);
             }
           },
           child: Padding(
@@ -607,7 +607,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: LucideIcons.volume2,
                 label: "Listen",
                 isPrimary: true,
-                onTap: () => _speak(output, kLanguageCodes[endLanguage]!),
+                onTap: () =>
+                    _speak(output, getLanguageData(endLanguage).locale),
               ),
               const Spacer(),
               _buildIconAction(LucideIcons.copy, () {
